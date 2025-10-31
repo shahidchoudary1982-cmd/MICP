@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MICP Data Manager</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>MICP Data Manager</h1>
+      <p>Upload Excel workbooks, store them in a SQL database, and explore wells through interactive charts.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Import Excel Workbook</h2>
+        <form id="uploadForm" class="upload-form">
+          <input type="text" name="project_name" placeholder="Project name" required />
+          <textarea name="description" rows="2" placeholder="Project description (optional)"></textarea>
+          <input type="file" name="file" accept=".xls,.xlsx,.xlsm" required />
+          <button type="submit">Upload</button>
+        </form>
+        <div id="status" class="status-message" role="status"></div>
+      </section>
+
+      <section class="card">
+        <h2>Data Filters</h2>
+        <div class="controls">
+          <label>
+            Project
+            <select id="projectSelect"></select>
+          </label>
+          <label>
+            Sheet
+            <select id="sheetSelect"></select>
+          </label>
+          <label>
+            Row start
+            <input type="number" id="rowStart" min="0" placeholder="e.g. 0" />
+          </label>
+          <label>
+            Row end
+            <input type="number" id="rowEnd" min="0" placeholder="e.g. 100" />
+          </label>
+          <label>
+            Record limit
+            <input type="number" id="recordLimit" value="200" min="10" max="500" />
+          </label>
+          <button id="reloadButton" type="button">Reload</button>
+        </div>
+      </section>
+
+      <section class="card table-container">
+        <h2>Well Data</h2>
+        <table id="recordsTable">
+          <thead>
+            <tr>
+              <th>Row #</th>
+              <th>Sheet</th>
+              <th>Company</th>
+              <th>Field</th>
+              <th>Well Name</th>
+              <th>Formation</th>
+              <th>Additional Data</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Project Analytics</h2>
+        <div class="graph-grid">
+          <div style="min-height: 240px"><canvas id="companyChart"></canvas></div>
+          <div style="min-height: 240px"><canvas id="fieldChart"></canvas></div>
+          <div style="min-height: 240px"><canvas id="formationChart"></canvas></div>
+          <div style="min-height: 240px"><canvas id="sheetChart"></canvas></div>
+          <div style="min-height: 240px"><canvas id="rowBucketChart"></canvas></div>
+          <div style="min-height: 240px"><canvas id="sheetRowChart"></canvas></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <small>Data stored locally in SQLite at <code>app/data/app.db</code>. Upload new workbooks at any time to create projects.</small>
+    </footer>
+  </body>
+</html>
