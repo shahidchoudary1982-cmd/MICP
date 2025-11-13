@@ -11,6 +11,7 @@ const API = {
   sheets: (id) => `/api/projects/${id}/sheets`,
   records: (id, params) => `/api/projects/${id}/records${params}`,
   stats: (id) => `/api/projects/${id}/stats`,
+  logPreview: '/api/logs/preview',
 };
 
 function showStatus(message, type = 'success') {
@@ -18,6 +19,65 @@ function showStatus(message, type = 'success') {
   if (!el) return;
   el.textContent = message;
   el.className = `status-message status-${type}`;
+}
+
+function showLogStatus(message, type = 'success') {
+  const el = document.querySelector('#logStatus');
+  if (!el) return;
+  el.hidden = !message;
+  el.textContent = message;
+  el.className = message ? `status-message status-${type}` : 'status-message';
+}
+
+function resetLogPreview() {
+  const container = document.querySelector('#logPreview');
+  if (!container) return;
+  container.hidden = true;
+  const notes = container.querySelector('[data-field="notes"]');
+  if (notes) notes.innerHTML = '';
+}
+
+function renderLogPreview(data) {
+  const container = document.querySelector('#logPreview');
+  if (!container) return;
+
+  const assignText = (field, value) => {
+    const element = container.querySelector(`[data-field="${field}"]`);
+    if (element) {
+      element.textContent = value;
+    }
+  };
+
+  assignText('file_name', data.file_name || '');
+  assignText('format', data.format || '');
+  assignText('well_names', (data.well_names || []).join(', ') || 'Not found');
+  assignText('curve_names', (data.curve_names || []).join(', ') || 'Not found');
+
+  let depthText = 'Not available';
+  const { depth_min: min, depth_max: max, depth_unit: unit } = data;
+  if (min != null || max != null) {
+    const parts = [];
+    if (min != null) parts.push(`${min}`);
+    parts.push('to');
+    if (max != null) parts.push(`${max}`);
+    depthText = parts.join(' ');
+  }
+  if (unit && depthText !== 'Not available') {
+    depthText = `${depthText} ${unit}`;
+  }
+  assignText('depth_range', depthText);
+
+  const notes = container.querySelector('[data-field="notes"]');
+  if (notes) {
+    notes.innerHTML = '';
+    (data.notes || []).forEach((note) => {
+      const item = document.createElement('li');
+      item.textContent = note;
+      notes.appendChild(item);
+    });
+  }
+
+  container.hidden = false;
 }
 
 async function fetchProjects() {
@@ -263,7 +323,42 @@ function setupEventListeners() {
   });
 }
 
+function setupLogForm() {
+  const logForm = document.querySelector('#logForm');
+  if (!logForm) return;
+
+  logForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    showLogStatus('Analysing log…', 'info');
+    resetLogPreview();
+
+    const formData = new FormData(logForm);
+    const response = await fetch(API.logPreview, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      showLogStatus(detail.detail || 'Failed to analyse log file.', 'error');
+      return;
+    }
+
+    const data = await response.json();
+    showLogStatus('Log analysed successfully.', 'success');
+    renderLogPreview(data);
+    logForm.reset();
+  });
+
+  logForm.addEventListener('change', () => {
+    showLogStatus('', 'info');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
+  setupLogForm();
+  resetLogPreview();
+  showLogStatus('', 'info');
   await fetchProjects();
 });

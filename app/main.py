@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, selectinload
 from starlette.requests import Request
 
-from . import crud, excel_loader, models, schemas
+from . import crud, excel_loader, log_loader, models, schemas
 from .database import Base, engine, get_session
 
 app = FastAPI(title="MICP Data Manager")
@@ -76,6 +76,32 @@ def import_project(
 
     session.refresh(project)
     return schemas.ProjectRead.from_orm(project)
+
+
+@app.post("/api/logs/preview", response_model=schemas.WellLogPreview)
+def preview_well_log(file: UploadFile = File(...)) -> schemas.WellLogPreview:
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    suffix = Path(file.filename).suffix.lower()
+    if suffix not in log_loader.SUPPORTED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+
+    uploads_dir = Path(__file__).resolve().parent / "data" / "logs"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    temp_path = uploads_dir / file.filename
+
+    with temp_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    try:
+        summary = log_loader.load_summary(temp_path)
+    except log_loader.WellLogError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+    return schemas.WellLogPreview(**summary.to_dict())
 
 
 @app.get("/api/projects", response_model=List[schemas.ProjectRead])

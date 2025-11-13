@@ -27,6 +27,26 @@
       </section>
 
       <section class="card">
+        <h2>Preview LIS / DLIS Well Log</h2>
+        <form id="logForm" class="upload-form">
+          <input type="file" name="file" accept=".lis,.dlis" required />
+          <button type="submit">Analyse Log</button>
+        </form>
+        <div id="logStatus" class="status-message" role="status" hidden></div>
+        <div id="logPreview" class="log-preview" hidden>
+          <h3>Log Summary</h3>
+          <p><strong>File:</strong> <span data-field="file_name"></span> (<span data-field="format"></span>)</p>
+          <p><strong>Well names:</strong> <span data-field="well_names"></span></p>
+          <p><strong>Curves:</strong> <span data-field="curve_names"></span></p>
+          <p>
+            <strong>Depth range:</strong>
+            <span data-field="depth_range"></span>
+          </p>
+          <ul class="log-notes" data-field="notes"></ul>
+        </div>
+      </section>
+
+      <section class="card">
         <h2>Data Filters</h2>
         <div class="controls">
           <label>
