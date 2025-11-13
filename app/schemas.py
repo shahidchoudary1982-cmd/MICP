@@ -53,3 +53,14 @@ class StatsResponse(BaseModel):
     wells_by_sheet: dict[str, int]
     wells_per_row_bucket: dict[str, int]
     sheet_row_counts: dict[str, int]
+
+
+class WellLogPreview(BaseModel):
+    file_name: str
+    format: str
+    well_names: list[str] = Field(default_factory=list)
+    curve_names: list[str] = Field(default_factory=list)
+    depth_min: Optional[float] = None
+    depth_max: Optional[float] = None
+    depth_unit: Optional[str] = None
+    notes: list[str] = Field(default_factory=list)

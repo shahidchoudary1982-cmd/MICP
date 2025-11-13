@@ -137,6 +137,33 @@ footer {
   color: #b91c1c;
 }
 
+.status-info {
+  background-color: rgba(96, 165, 250, 0.18);
+  color: #1d4ed8;
+}
+
+.log-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background-color: rgba(98, 182, 203, 0.12);
+  border: 1px solid rgba(27, 73, 101, 0.2);
+}
+
+.log-preview p {
+  margin: 0.5rem 0;
+}
+
+.log-notes {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  color: #1b4965;
+}
+
+.log-notes li {
+  margin-bottom: 0.35rem;
+}
+
 @media (max-width: 600px) {
   header {
     text-align: center;
